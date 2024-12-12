@@ -1,0 +1,11 @@
+<launch>
+	<node pkg="occupancy_sensor" type="occupancy_pub_node.py" name="occupancy_publisher" output="screen" />
+	<node pkg="occupancy_sensor" type="occupancy_sub_node.py" name="occupancy_subscriber" output="screen" />	
+	<node pkg="seacube_actuator" type="actuator_node.py" name="actuator_node" output="screen" />
+
+	<!--
+	<node pkg="rosbag" type="record" name="occupancy_rosbag" 
+		  args="-o /home/pi/Seacube/bagfiles/occupancy_test /switch_topic /rfid_topic /charging_topic /imu_topic /filter_topic /occupancy_topic /average_INA169_topic" />
+	-->
+		  
+</launch>
