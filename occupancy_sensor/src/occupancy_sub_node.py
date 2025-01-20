@@ -33,15 +33,15 @@ class OccupancySubscriberNode:
 		self.green_LED = LED(17)
 		self.red_LED = LED(27)
 		self.green_LED.off()	#Set default lighting
-		self.red_LED.on()		#Set default lighting
+		self.red_LED.on()	#Set default lighting
 		
 		self.switch_occupancy = False		#Monitors if switch indicates occupancy
-		self.rfid_occupancy = False			#Monitors if RFID indicates occupancy
+		self.rfid_occupancy = False		#Monitors if RFID indicates occupancy
 		self.filter_occupancy = False		#Monitors if IMU high pass filter indicates occupancy
 		self.charging_occupancy = False		#Monitors if inductive module indicates occupancy
 		self.occupancy_status = False		#Uses above variables to determine if LoCO has docked
 		self.carriage_raised = False		#Stores current status of carriage
-		self.carriage_timer = 0				#Timer used to raise/lower the carriage
+		self.carriage_timer = 0			#Timer used to raise/lower the carriage
 		
 		#Switch class variables
 		self.switch_start_press = 0		#Timer variable measuring if switch depressed for >=2 seconds
@@ -52,9 +52,9 @@ class OccupancySubscriberNode:
 		self.first_iteration = 1		#indicates the loop is iterating for the very first time
 		
 		#INA169/inductive module class variables 
-		self.charging_avg = 0			#Stores average of 50 most recent analog readings
-		self.charging_sum = 0			#Variable for calculating the average
-		self.charging_counter = 0		#Variable for calculating the average
+		self.charging_avg = 0		#Stores average of 50 most recent analog readings
+		self.charging_sum = 0		#Variable for calculating the average
+		self.charging_counter = 0	#Variable for calculating the average
 		self.charging_threshold = 45	#Threshold that self.charging_avg must surpass to indicate coil alignment
 	
 		#Subscribers to topics from publsiher node:
@@ -101,12 +101,12 @@ class OccupancySubscriberNode:
 		#------------------------Compute INA169/charger occupancy status----------------------
 		
 		#Compute average of 50 analog outputs from INA169
-		if self.charging_counter >= 50: 	#Ready to update average analog value	
+		if self.charging_counter >= 50:						#Ready to update average analog value	
 			self.charging_avg = self.charging_sum / self.charging_counter
-			self.pub_average_INA169.publish(int(self.charging_avg))	#Publish calculated average for bagging
-			self.charging_sum = 0 			#Reset for next average calculation
+			self.pub_average_INA169.publish(int(self.charging_avg))		#Publish calculated average for bagging
+			self.charging_sum = 0 						#Reset for next average calculation
 			self.charging_counter = 0
-		else: 								#Continue averaging charging value
+		else:									#Continue averaging charging value
 			self.charging_sum += self.charging.data
 			self.charging_counter += 1
 			
@@ -122,25 +122,25 @@ class OccupancySubscriberNode:
 		else:						
 			if (not self.filter_occupancy) and (self.filter.data >= self.filter_threshold):	#New collision detected
 				self.filter_occupancy = True
-				self.filter_timer = time.time() + 5								#5 seconds from now
-			elif self.filter_occupancy and time.time() >= self.filter_timer:	#5 seconds have passed, reset
+				self.filter_timer = time.time() + 5					#5 seconds from now
+			elif self.filter_occupancy and time.time() >= self.filter_timer:		#5 seconds have passed, reset
 				self.filter_occupancy = False
 			else:
 				pass
 		
 		#----------------------------Compute switch occupancy status------------------------- 
 		
-		if not self.switch.data:									#Switch not being depressed
+		if not self.switch.data:						#Switch not being depressed
 			self.switch_start_press = 0
 			self.switch_occupancy = False
-		else:														#Switch is depressed
-			if self.switch_start_press == 0:						#Switch depressed for first time in a while				
+		else:									#Switch is depressed
+			if self.switch_start_press == 0:				#Switch depressed for first time in a while				
 				self.switch_start_press = time.time()				
 				self.switch_occupancy = False
-			else:													#Switch has been held down for some time
+			else:								#Switch has been held down for some time
 				if (time.time() - self.switch_start_press) >= 2: 	#If switch depressed for at least 2 seconds
 					self.switch_occupancy = True
-				else:												#Switch has not been depressed for at least 2 seconds
+				else:							#Switch has not been depressed for at least 2 seconds
 					self.switch_occupancy = False				
 
 		#----------------------------Compute RFID occupancy status------------------------- 
@@ -186,14 +186,14 @@ class OccupancySubscriberNode:
 			self.occupancy_string += " (Raising carriage) "
 			self.raise_carriage.publish(40) 		#Publish message to raise carriage
 			self.carriage_raised = True
-			self.carriage_timer = time.time() + 45 	#Do not actuate carriage again until current action completes
+			self.carriage_timer = time.time() + 45 		#Do not actuate carriage again until current action completes
 		if(self.carriage_raised and (time.time() >= self.carriage_timer)):
 		    self.green_LED.off()
 		    self.red_LED.on()
 		    self.occupancy_string += " (Lowering carriage) "
-		    self.lower_carriage.publish(40) 		#Publish message to lower carriage
+		    self.lower_carriage.publish(40) 			#Publish message to lower carriage
 		    self.carriage_raised = False
-		    self.carriage_timer = time.time() + 60 	#Provide additional time for LoCO to exit carriage
+		    self.carriage_timer = time.time() + 60 		#Provide additional time for LoCO to exit carriage
 		
 		
 		
@@ -217,7 +217,7 @@ class OccupancySubscriberNode:
 		self.actuate()		#Actuate carriage and LED indicators accordingly
 		
 		self.pub_occupancy.publish(self.occupancy_string) 	#Publish triggered sensors for bagging
-		rospy.loginfo(self.occupancy_string)				#Print triggered sensors to terminal
+		rospy.loginfo(self.occupancy_string)			#Print triggered sensors to terminal
 		
 		
 		
