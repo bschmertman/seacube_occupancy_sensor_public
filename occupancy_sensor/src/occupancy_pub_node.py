@@ -67,11 +67,11 @@ class OccupancyPublisherNode:
 		while not rospy.is_shutdown():
 			self.line = "" #Reset for current iteration
 			
-			if self.ser.in_waiting > 0: #New data available over serial
+			if self.ser.in_waiting > 0: 	#New data available over serial
 				#Read line from serial port, convert to string, strip whitespace:
 				self.line = self.ser.readline().decode('utf-8').rstrip()
 				self.last_line = self.line
-			else: 	#No new data read over serial, will republish old data
+			else: 		#No new data read over serial, will republish old data
 				self.line = self.last_line
 			
 			#Parse self.line and fill message objects with data
@@ -88,7 +88,7 @@ class OccupancyPublisherNode:
 			self.charger_msg.data = int(self.line_array[2])
 			
 			self.imu_msg.header.stamp = rospy.Time.now() 	#Timestamp for IMU message header
-			self.imu_msg.header.frame_id = "imu_link" 		#Default coordinate frame for IMU message header
+			self.imu_msg.header.frame_id = "imu_link" 	#Default coordinate frame for IMU message header
 
 			self.imu_msg.linear_acceleration = Vector3(float(self.line_array[3]), #x, y, z linear accelerations
 													   float(self.line_array[4]), 
